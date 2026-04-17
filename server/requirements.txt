@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+lancedb
+pydantic
+sentence-transformers
+python-multipart
+GitPython
+python-dotenv
+aiofiles
+PyPDF2
