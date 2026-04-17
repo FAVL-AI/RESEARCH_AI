@@ -1,0 +1,6 @@
+# Constructive Relationships Between Algebraic Thickness and Normality
+
+We study the relationship between two measures of Boolean functions; \emph{algebraic thickness} and \emph{normality}. For a function $f$, the algebraic thickness is a variant of the \emph{sparsity}, the number of nonzero coefficients in the unique GF(2) polynomial representing $f$, and the normality is the largest dimension of an affine subspace on which $f$ is constant. We show that for $0 < ε<2$, any function with algebraic thickness $n^{3-ε}$ is constant on some affine subspace of dimension $Ω\left(n^{\fracε{2}}\right)$. Furthermore, we give an algorithm for finding such a subspace. We show that this is at most a factor of $Θ(\sqrt{n})$ from the best guaranteed, and when restricted to the technique used, is at most a factor of $Θ(\sqrt{\log n})$ from the best guaranteed. We also show that a concrete function, majority, has algebraic thickness $Ω\left(2^{n^{1/6}}\right)$.
+
+---
+Metadata: {"source": "arxiv", "authors": ["Joan Boyar", "Magnus Gausdal Find"], "pdf_url": "https://arxiv.org/pdf/1410.1318v2"}
