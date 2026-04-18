@@ -43,13 +43,13 @@ export const SynthesisHub = () => {
   if (!graphData.nodes.length) return null;
 
   return (
-    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[700px] pointer-events-none select-none">
+    <div className="w-full pointer-events-none select-none mt-4">
       <AnimatePresence>
         {!synthesis && !loading && !fullReport && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center gap-4"
+            className="flex flex-col gap-3 w-full"
           >
             <button
               onClick={runSynthesis}

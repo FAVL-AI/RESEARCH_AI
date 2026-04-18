@@ -8,6 +8,18 @@ import { CitationModal } from "@/components/dashboard/CitationModal";
 import { useStore } from "@/store/useStore";
 import { cn } from "@/lib/utils";
 
+const renderMarkdown = (text: string) => {
+  if (!text) return null;
+  return text.split('\n').map((line, i) => {
+    if (line.startsWith('# ')) return <h1 key={i} className="text-2xl font-black text-white mt-6 mb-4 leading-tight tracking-tight">{line.replace('# ', '')}</h1>;
+    if (line.startsWith('## ')) return <h2 key={i} className="text-lg font-bold text-white mt-5 mb-3">{line.replace('## ', '')}</h2>;
+    if (line.startsWith('### ')) return <h3 key={i} className="text-md font-bold text-white mt-4 mb-2">{line.replace('### ', '')}</h3>;
+    if (line.startsWith('- ')) return <li key={i} className="ml-4 list-disc mb-1 text-white/70">{line.replace('- ', '')}</li>;
+    if (line.trim() === '') return <div key={i} className="h-4" />;
+    return <p key={i} className="mb-2 text-white/70 leading-relaxed font-sans">{line}</p>;
+  });
+};
+
 export default function PaperPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -19,6 +31,7 @@ export default function PaperPage() {
   const [citationModal, setCitationModal] = useState({ open: false, text: "", style: "apa" });
   const [resolving, setResolving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPaper = async () => {
@@ -161,44 +174,63 @@ export default function PaperPage() {
              <div className="grid grid-cols-2 gap-3">
                <button 
                 onClick={async () => {
-                  setLoading(true);
+                  setActionLoading('summarize');
                   try {
                     const res = await axios.post('http://127.0.0.1:8000/api/agent/summarize', { id });
-                    alert(res.data.summary);
+                    alert(res.data.summary || "Summary generation completed.");
+                  } catch (err) {
+                    alert("Failed to summarize this node.");
                   } finally {
-                    setLoading(false);
+                    setActionLoading(null);
                   }
                 }}
-                className="py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                disabled={actionLoading !== null}
+                className={cn(
+                  "py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2",
+                  actionLoading === 'summarize' && "opacity-50 cursor-wait"
+                )}
                >
-                  <Zap size={14} className="text-accent" />
-                  SUMMARIZE
+                  <Zap size={14} className={cn("text-accent", actionLoading === 'summarize' && "animate-spin")} />
+                  {actionLoading === 'summarize' ? "SUMMARIZING..." : "SUMMARIZE"}
                </button>
 
                <button 
                 onClick={async () => {
-                  setLoading(true);
+                  setActionLoading('reproduce');
                   try {
                     const res = await axios.post('http://127.0.0.1:8000/api/agent/reproduce', { id });
                     alert(`GITHUB REPOS: ${JSON.stringify(res.data.repositories)}\n\nPLAN: ${res.data.plan}`);
+                  } catch (err) {
+                    alert("Failed to build reproduction plan.");
                   } finally {
-                    setLoading(false);
+                    setActionLoading(null);
                   }
                 }}
-                className="py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                disabled={actionLoading !== null}
+                className={cn(
+                  "py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2",
+                  actionLoading === 'reproduce' && "opacity-50 cursor-wait"
+                )}
                >
-                  <GitBranch size={14} className="text-accent" />
-                  REPRO_PLAN
+                  <GitBranch size={14} className={cn("text-accent", actionLoading === 'reproduce' && "animate-spin")} />
+                  {actionLoading === 'reproduce' ? "BUILDING PLAN..." : "REPRO_PLAN"}
                </button>
              </div>
 
              <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
                 <button 
-                  onClick={() => handleCite("apa")}
-                  className="py-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-[10px] font-bold hover:bg-cyan-500/20 text-cyan-400 transition-all flex items-center justify-center gap-2"
+                  onClick={() => {
+                     setActionLoading('cite');
+                     handleCite("apa").finally(() => setActionLoading(null));
+                  }}
+                  disabled={actionLoading !== null}
+                  className={cn(
+                    "py-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-[10px] font-bold hover:bg-cyan-500/20 text-cyan-400 transition-all flex items-center justify-center gap-2",
+                    actionLoading === 'cite' && "opacity-50 cursor-wait"
+                  )}
                 >
-                  <Quote size={14} />
-                  CITE_NODE
+                  <Quote size={14} className={cn(actionLoading === 'cite' && "animate-pulse")} />
+                  {actionLoading === 'cite' ? "GENERATING..." : "CITE_NODE"}
                 </button>
                 <button 
                   onClick={handleResolve}
@@ -238,12 +270,22 @@ export default function PaperPage() {
                       if (e.key === 'Enter') {
                         const target = e.currentTarget;
                         const q = target.value;
-                        target.value = 'Asking Gemma...';
+                        if (!q) return;
+                        
+                        setActionLoading('qa');
+                        target.value = 'Asking Sovereign Engine...';
+                        target.disabled = true;
+                        
                         try {
                           const res = await axios.post('http://127.0.0.1:8000/api/agent/qa', { id, question: q });
-                          alert(res.data.answer);
+                          alert(`Q: ${q}\n\n${res.data.answer || "No insights found."}`);
+                        } catch (err) {
+                           alert("Network failure during QA query.");
                         } finally {
+                          target.disabled = false;
                           target.value = '';
+                          target.focus();
+                          setActionLoading(null);
                         }
                       }
                     }}
@@ -304,21 +346,32 @@ export default function PaperPage() {
           </section>
         </div>
 
-        {/* PDF Reader Panel */}
-        <div className="flex-1 bg-[#111] relative group">
-          <iframe 
-            src={`https://arxiv.org/pdf/${arxivId}.pdf`}
-            className="w-full h-full border-none"
-            title="PDF Reader"
-          />
-          <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button 
-              onClick={() => window.open(`https://arxiv.org/pdf/${arxivId}.pdf`, "_blank")}
-              className="p-3 bg-black/80 backdrop-blur border border-white/20 rounded-full text-white hover:text-accent shadow-2xl"
-            >
-              <ExternalLink size={20} />
-            </button>
-          </div>
+        {/* Dynamic View Panel (PDF or Markdown) */}
+        <div className="flex-1 bg-[#111] relative group overflow-y-auto no-scrollbar">
+          {id.toString().startsWith("arxiv_") || /^\d{4}\.\d{4,5}$/.test(id.toString()) ? (
+             <>
+               <iframe 
+                 src={`https://arxiv.org/pdf/${arxivId}.pdf`}
+                 className="w-full h-full border-none"
+                 title="PDF Reader"
+               />
+               <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <button 
+                   onClick={() => window.open(`https://arxiv.org/pdf/${arxivId}.pdf`, "_blank")}
+                   className="p-3 bg-black/80 backdrop-blur border border-white/20 rounded-full text-white hover:text-accent shadow-2xl"
+                 >
+                   <ExternalLink size={20} />
+                 </button>
+               </div>
+             </>
+          ) : (
+             <div className="p-10 max-w-3xl mx-auto">
+               <div className="text-[10px] font-black tracking-[0.3em] uppercase text-accent mb-6 flex items-center gap-2">
+                 <FileText size={14} /> Cognitive_Note_View
+               </div>
+               {renderMarkdown(paper.content)}
+             </div>
+          )}
         </div>
       </div>
       <CitationModal 

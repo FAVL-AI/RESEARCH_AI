@@ -8,7 +8,7 @@ import { AgentActivityPanel } from "@/components/dashboard/AgentActivityPanel";
 import { MissionControlPanel } from "@/components/dashboard/MissionControlPanel";
 import { useSwarmState } from "@/hooks/useSwarmState";
 import { useState } from "react";
-import { Maximize2, Layers } from "lucide-react";
+import { Maximize2, Layers, PanelRightClose, PanelRightOpen, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 import { GovernancePanel } from "@/components/dashboard/GovernancePanel";
 import { TimelinePanel } from "@/components/dashboard/TimelinePanel";
@@ -16,6 +16,8 @@ import { SupervisorPanel } from "@/components/dashboard/SupervisorPanel";
 
 export default function DashboardPage() {
   const [view, setView] = useState<'d3' | 'cy'>('cy');
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(true);
   
   // Initialize Real-time Swarm Telemetry
   useSwarmState();
@@ -36,32 +38,48 @@ export default function DashboardPage() {
 
       <div className="flex flex-1 relative overflow-hidden">
         {/* Region 1: Mission Control (Sidebar) */}
-        <div className="w-[420px] h-full p-8 border-r border-white/5 bg-black/20 overflow-y-auto custom-scrollbar">
-          <MissionControlPanel />
-          <div className="mt-8 pt-8 border-t border-white/5">
-            <GovernancePanel />
+        {isLeftPanelOpen && (
+          <div className="w-[320px] shrink-0 h-full p-8 border-r border-white/5 bg-black/20 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-track]:bg-transparent">
+            <MissionControlPanel />
+            <div className="mt-8 pt-8 border-t border-white/5">
+              <GovernancePanel />
+            </div>
+            <div className="mt-8 pt-8 border-t border-white/5">
+              <h3 className="text-[10px] font-black tracking-widest uppercase text-accent mb-4">Discovery Timeline</h3>
+              <TimelinePanel />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Region 2: Intelligence Canvas (Center Expansion) */}
-        <div className="flex-1 relative flex flex-col">
+        <div className="flex-1 relative flex flex-col min-w-0">
           <div className="flex-1 relative">
-             <div className="absolute inset-0 z-0 opacity-40">
+             <div className="absolute inset-0 z-0">
                {view === 'd3' ? <GraphCanvas /> : <CytoscapeCanvas />}
              </div>
-             
-             {/* Region 3: Timeline & Hypothesis Discovery (Floating Bottom) */}
-             <div className="absolute bottom-8 left-8 right-8 z-30">
-                <TimelinePanel />
-             </div>
           </div>
+          
+          <button
+            onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+            className="absolute top-4 left-4 z-50 p-2 bg-black/60 border border-white/10 rounded-xl text-white/50 hover:text-accent hover:border-accent/50 transition-all backdrop-blur-xl shadow-2xl"
+          >
+            {isLeftPanelOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+          </button>
+
+          <button
+            onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
+            className="absolute top-4 right-4 z-50 p-2 bg-black/60 border border-white/10 rounded-xl text-white/50 hover:text-accent hover:border-accent/50 transition-all backdrop-blur-xl shadow-2xl"
+          >
+            {isRightPanelOpen ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
+          </button>
         </div>
 
         {/* Region 4: Agent Activity, Supervision & CTO Decisions (Right) */}
-        <div className="w-[380px] h-full bg-black/40 border-l border-white/5 p-6 flex flex-col gap-6 overflow-y-auto">
-            <SupervisorPanel />
-            <AgentActivityPanel />
-            <div className="min-h-[300px] bg-white/[0.02] rounded-3xl border border-white/5 p-6 backdrop-blur-3xl">
+        {isRightPanelOpen && (
+          <div className="w-[320px] shrink-0 h-full bg-black/40 border-l border-white/5 p-6 flex flex-col gap-6 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-track]:bg-transparent">
+              <SupervisorPanel />
+              <AgentActivityPanel />
+              <div className="min-h-[300px] bg-white/[0.02] rounded-3xl border border-white/5 p-6 backdrop-blur-3xl">
                 <h3 className="text-[10px] font-black tracking-widest uppercase text-accent mb-4">Sovereign Synthesis</h3>
                 <SynthesisHub />
             </div>
@@ -80,7 +98,8 @@ export default function DashboardPage() {
                   <Maximize2 size={18} />
                 </button>
             </div>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -153,7 +153,7 @@ class ResearcherAgent(BaseAgent):
         for i, n1 in enumerate(nodes):
             for j, n2 in enumerate(nodes):
                 if i >= j: continue
-                if n1.get("cluster") == n2.get("cluster") and n1["cluster"] is not None:
+                if n1.get("cluster") == n2.get("cluster") and n1.get("cluster") is not None:
                     pair = tuple(sorted([n1["id"], n2["id"]]))
                     if pair not in connected_pairs:
                         gaps.append((n1, n2))

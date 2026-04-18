@@ -17,7 +17,7 @@ export const AgentActivityPanel = () => {
   }, [logs]);
 
   return (
-    <div className="absolute right-4 bottom-24 w-80 max-h-[400px] z-40 flex flex-col pointer-events-none">
+    <div className="w-full flex-1 min-h-[250px] z-40 flex flex-col pointer-events-none mt-4">
       <div className="flex items-center gap-2 mb-3 ml-2">
         <div className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/20 border border-accent/30 animate-pulse">
            <Activity size={12} className="text-accent" />

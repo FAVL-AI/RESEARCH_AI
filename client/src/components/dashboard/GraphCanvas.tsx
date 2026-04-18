@@ -67,8 +67,21 @@ export const GraphCanvas = () => {
     const width = containerRef.current.clientWidth;
     const height = containerRef.current.clientHeight;
 
-    const nodes: Node[] = [...graphData.nodes];
-    const links: Link[] = [...graphData.links];
+    // Deep clone to prevent D3 from mutating React state in Strict Mode
+    const nodes: any[] = graphData.nodes.map(n => ({ ...n }));
+    const nodeIds = new Set(nodes.map(n => n.id));
+
+    const links: any[] = graphData.links
+      .filter(l => {
+        const srcId = typeof l.source === 'object' ? l.source.id : l.source;
+        const tgtId = typeof l.target === 'object' ? l.target.id : l.target;
+        return nodeIds.has(srcId) && nodeIds.has(tgtId);
+      })
+      .map(l => ({ 
+        ...l,
+        source: typeof l.source === 'object' ? l.source.id : l.source,
+        target: typeof l.target === 'object' ? l.target.id : l.target
+      }));
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();

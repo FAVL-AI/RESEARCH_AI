@@ -183,6 +183,11 @@ def resolve_path(node_id: str, node_type: str = None) -> str:
         if os.path.exists(path):
             return path
             
+    # Check absolute root memory storage
+    root_path = os.path.join(STORAGE_PATH, f"{node_id}.md")
+    if os.path.exists(root_path):
+        return root_path
+            
     # Default to papers for ingestion
     return os.path.join(STORAGE_PATH, "papers", f"{node_id}.md")
 

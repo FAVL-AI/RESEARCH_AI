@@ -9,7 +9,7 @@ import axios from "axios";
 import { cn } from "@/lib/utils";
 
 export const CytoscapeCanvas = () => {
-  const { graphData, setGraphData } = useStore();
+  const { graphData, setGraphData, selectedNodeId } = useStore();
   const { nodes, links } = graphData;
   const router = useRouter();
   const cyRef = useRef<any>(null);
@@ -35,26 +35,58 @@ export const CytoscapeCanvas = () => {
     }
   };
 
+  const validNodeIds = new Set((nodes || []).map(n => n.id));
+  
+  const rootNodeId = selectedNodeId || (nodes.length > 0 ? nodes[0].id : null);
+  
+  // Create an explicit neural link lattice if independent files are loaded to maintain shape (SOTA benchmark mode)
+  const syntheticLinks = [];
+  if (nodes.length > 1 && links.length === 0 && rootNodeId) {
+     for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id !== rootNodeId) {
+           syntheticLinks.push({ source: rootNodeId, target: nodes[i].id, type: "structural" });
+        }
+     }
+  }
+
+  const mergedLinks = links.length > 0 ? links : syntheticLinks;
+  
   const elements = [
     ...(nodes || []).flatMap(n => {
+      const isRoot = n.id === rootNodeId;
       const baseNode = {
         data: {
           id: n.id,
           label: n.name || n.id,
           type: n.type,
           score: (n as any).metadata?.score || 1,
-          cluster: (n as any).cluster || 0
-        }
+          cluster: (n as any).cluster || 0,
+          isRoot: isRoot ? "true" : "false"
+        },
+        classes: isRoot ? "root-node" : `cluster-${(n as any).cluster || 0}`
       };
       return [baseNode];
     }),
-    ...(links || []).map(l => ({
-      data: {
-        source: typeof l.source === 'string' ? l.source : (l.source as any).id,
-        target: typeof l.target === 'string' ? l.target : (l.target as any).id,
-        relationship: (l as any).type || "cites"
-      }
-    }))
+    ...(mergedLinks || [])
+      .filter((l: any) => {
+         const src = typeof l.source === 'string' ? l.source : l.source.id;
+         const tgt = typeof l.target === 'string' ? l.target : l.target.id;
+         return validNodeIds.has(src) && validNodeIds.has(tgt);
+      })
+      .map((l: any) => {
+        const src = typeof l.source === 'string' ? l.source : l.source.id;
+        const tgt = typeof l.target === 'string' ? l.target : l.target.id;
+        return {
+          data: {
+            id: `${src}-${tgt}`,
+            source: src,
+            target: tgt,
+            relationship: l.type || "cites",
+            structural: l.type === "structural" ? "true" : "false"
+          },
+          classes: l.type === "structural" ? "structural-edge" : "standard-edge"
+        };
+      })
   ];
 
   const stylesheet: any = [
@@ -63,69 +95,145 @@ export const CytoscapeCanvas = () => {
       style: {
         label: "data(label)",
         "color": "#fff",
-        "font-size": "8px",
+        "font-size": "12px",
+        "font-weight": "600",
+        "font-family": "Inter, sans-serif",
         "text-valign": "bottom",
         "text-halign": "center",
-        "text-margin-y": "4px",
-        "background-color": (ele: any) => {
-          const cluster = ele.data("cluster") || 0;
-          const colors = ["#00F5FF", "#FF00E5", "#00FF41", "#FFD700", "#FF4500"];
-          return colors[cluster % colors.length];
-        },
-        "width": (ele: any) => {
-          const score = ele.data("score") || 1;
-          return 25 + Math.min(30, Math.log1p(score) * 10);
-        },
-        "height": (ele: any) => {
-          const score = ele.data("score") || 1;
-          return 25 + Math.min(30, Math.log1p(score) * 10);
-        },
-        "border-width": 2,
-        "border-color": "#fff",
-        "border-opacity": 0.1,
-        "ghost": "yes",
-        "ghost-offset-y": 2,
-        "ghost-opacity": 0.1,
-        "transition-property": "background-color, width, height",
-        "transition-duration": "0.3s"
+        "text-margin-y": "8px",
+        "text-outline-color": "#000",
+        "text-outline-width": 4,
+        "width": 40,
+        "height": 40,
+        "border-width": 3,
+        "border-color": "rgba(255,255,255,0.8)",
+        "border-opacity": 0.6,
+        "underlay-color": "#ffffff",
+        "underlay-padding": 6,
+        "underlay-opacity": 0.1,
+        "underlay-shape": "ellipse",
+        "transition-property": "opacity, background-color, width, height, border-width",
+        "transition-duration": "0.4s",
+        "opacity": 1
+      }
+    },
+    { selector: 'node[cluster = 0]', style: { 'background-color': '#00F5FF' } },
+    { selector: 'node[cluster = 1]', style: { 'background-color': '#FF00E5' } },
+    { selector: 'node[cluster = 2]', style: { 'background-color': '#00FF41' } },
+    { selector: 'node[cluster = 3]', style: { 'background-color': '#FFD700' } },
+    { selector: 'node[cluster = 4]', style: { 'background-color': '#FF4500' } },
+    {
+      selector: "node.root-node",
+      style: {
+        "width": 80,
+        "height": 80,
+        "font-size": "16px",
+        "font-weight": "900",
+        "background-color": "#ffffff",
+        "border-width": 6,
+        "border-color": "#00F5FF",
+        "border-opacity": 1,
+        "underlay-color": "#00F5FF",
+        "underlay-padding": 15,
+        "underlay-opacity": 0.3
       }
     },
     {
       selector: "edge",
       style: {
-        "width": 1,
-        "line-color": "#222",
-        "curve-style": "bezier",
+        "curve-style": "unbundled-bezier",
         "target-arrow-shape": "triangle",
-        "target-arrow-color": "#222",
-        "opacity": 0.3
+        "arrow-scale": 1.2,
+        "transition-property": "opacity, line-color, width",
+        "transition-duration": "0.4s"
+      }
+    },
+    {
+      selector: "edge.structural-edge",
+      style: {
+        "width": 1.5,
+        "line-color": "rgba(255,255,255,0.15)",
+        "line-style": "dashed",
+        "target-arrow-shape": "none",
+        "opacity": 0.4
+      }
+    },
+    {
+      selector: "edge.standard-edge",
+      style: {
+        "width": 2.5,
+        "line-color": "#00F5FF",
+        "line-style": "solid",
+        "target-arrow-color": "#00F5FF",
+        "opacity": 0.7
       }
     },
     {
       selector: ":selected",
       style: {
-        "border-width": 4,
+        "border-width": 8,
         "border-color": "#00F5FF",
-        "border-opacity": 0.8
+        "border-opacity": 1,
+        "underlay-padding": 20,
+        "underlay-opacity": 0.8
+      }
+    },
+    {
+      selector: ".faded",
+      style: {
+        "opacity": 0.1,
+        "underlay-opacity": 0
+      }
+    },
+    {
+      selector: ".highlighted",
+      style: {
+        "border-color": "#00F5FF",
+        "opacity": 1,
+        "border-opacity": 1,
+        "underlay-opacity": 0.5
+      }
+    },
+    {
+      selector: "edge.highlighted",
+      style: {
+        "opacity": 1,
+        "width": 4,
+        "line-color": "#00F5FF"
       }
     }
   ];
 
   useEffect(() => {
     if (cyRef.current) {
-      cyRef.current.on('tap', 'node', (evt: any) => {
+      const cy = cyRef.current;
+      
+      cy.on('tap', 'node', (evt: any) => {
         const node = evt.target;
         router.push(`/dashboard/paper/${node.id()}`);
       });
 
-      cyRef.current.on('cxttap', 'node', (evt: any) => {
+      cy.on('cxttap', 'node', (evt: any) => {
         const node = evt.target;
         const pos = evt.renderedPosition;
         setContextMenu({ x: pos.x, y: pos.y, nodeId: node.id() });
       });
 
-      cyRef.current.on('tap', (evt: any) => {
-        if (evt.target === cyRef.current) setContextMenu(null);
+      cy.on('tap', (evt: any) => {
+        if (evt.target === cy) setContextMenu(null);
+      });
+
+      // Hover Interactive Neighborhood Fading (Litmaps style)
+      cy.on('mouseover', 'node', (e: any) => {
+        const sel = e.target;
+        cy.elements().removeClass('highlighted').addClass('faded');
+        sel.removeClass('faded').addClass('highlighted');
+        sel.neighborhood().removeClass('faded').addClass('highlighted');
+        // also explicitly highlight the root if helpful, but sticking to real neighbors creates a true spiderweb interaction
+      });
+
+      cy.on('mouseout', 'node', () => {
+        cy.elements().removeClass('faded highlighted');
       });
     }
   }, [router]);
@@ -137,17 +245,21 @@ export const CytoscapeCanvas = () => {
            style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       
       <CytoscapeComponent
+        key={`${elements.length}-${rootNodeId || "default"}`}
         elements={elements}
         style={{ width: "100%", height: "100%" }}
         stylesheet={stylesheet}
         cy={(cy) => { cyRef.current = cy; }}
         layout={{ 
-          name: "cose", 
+          name: "concentric", 
           animate: true,
-          nodeOverlap: 20,
-          refresh: 20,
-          componentSpacing: 80,
-          nodeRepulsion: 4000
+          animationDuration: 600,
+          concentric: (node: any) => {
+            return node.hasClass("root-node") ? 200 : Math.max(10, node.degree() * 10); // Root forcefully dominates center ring
+          },
+          levelWidth: () => 10,
+          padding: 80,
+          minNodeSpacing: 60
         }}
         className="z-10"
       />
