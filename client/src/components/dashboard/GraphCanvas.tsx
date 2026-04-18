@@ -100,7 +100,7 @@ export const GraphCanvas = () => {
       .force("link", d3.forceLink<Node, Link>(links).id(d => d.id).distance(120))
       .force("charge", d3.forceManyBody().strength(-400))
       .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(d => (d as Node).val + 20));
+      .force("collision", d3.forceCollide().radius(d => ((d as Node).val || 15) + 20));
 
     const link = g.append("g")
       .selectAll("line")
@@ -164,7 +164,7 @@ export const GraphCanvas = () => {
     ];
 
     node.append("circle")
-      .attr("r", d => d.val)
+      .attr("r", d => d.val || 15)
       .attr("fill", d => {
         // If clustered, use cluster color, otherwise default by type
         if (d.cluster !== undefined && d.cluster < clusterColors.length) {
@@ -182,13 +182,16 @@ export const GraphCanvas = () => {
       .style("filter", "url(#glow)");
 
     node.append("text")
-      .attr("dy", d => d.val + 20)
+      .attr("dy", d => (d.val || 15) + 20)
       .attr("text-anchor", "middle")
       .attr("fill", "rgba(255, 255, 255, 0.8)")
       .attr("font-size", "11px")
       .attr("font-weight", "500")
       .attr("font-family", "Inter, sans-serif")
-      .text(d => d.name.length > 20 ? d.name.substring(0, 20) + "..." : d.name);
+      .text(d => {
+        const textLabel = d.name || (d as any).title || d.id || "";
+        return textLabel.length > 20 ? textLabel.substring(0, 20) + "..." : textLabel;
+      });
 
     simulation.on("tick", () => {
       link

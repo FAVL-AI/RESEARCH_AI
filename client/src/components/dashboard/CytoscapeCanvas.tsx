@@ -39,12 +39,17 @@ export const CytoscapeCanvas = () => {
   
   const rootNodeId = selectedNodeId || (nodes.length > 0 ? nodes[0].id : null);
   
-  // Create an explicit neural link lattice if independent files are loaded to maintain shape (SOTA benchmark mode)
+  // Create an organic particle web if independent files are loaded
   const syntheticLinks = [];
   if (nodes.length > 1 && links.length === 0 && rootNodeId) {
      for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].id !== rootNodeId) {
            syntheticLinks.push({ source: rootNodeId, target: nodes[i].id, type: "structural" });
+           
+           // Organic lateral linkages to create true "spiderweb" rather than star-graph
+           if (i > 0 && nodes[i-1].id !== rootNodeId && Math.random() > 0.2) {
+               syntheticLinks.push({ source: nodes[i].id, target: nodes[i-1].id, type: "structural_lateral" });
+           }
         }
      }
   }
@@ -82,9 +87,9 @@ export const CytoscapeCanvas = () => {
             source: src,
             target: tgt,
             relationship: l.type || "cites",
-            structural: l.type === "structural" ? "true" : "false"
+            structural: (l.type && l.type.startsWith("structural")) ? "true" : "false"
           },
-          classes: l.type === "structural" ? "structural-edge" : "standard-edge"
+          classes: (l.type && l.type.startsWith("structural")) ? "structural-edge" : "standard-edge"
         };
       })
   ];
@@ -94,78 +99,72 @@ export const CytoscapeCanvas = () => {
       selector: "node",
       style: {
         label: "data(label)",
-        "color": "#fff",
-        "font-size": "12px",
-        "font-weight": "600",
+        "color": "rgba(255,255,255,0.7)",
+        "font-size": "10px",
+        "font-weight": "500",
         "font-family": "Inter, sans-serif",
         "text-valign": "bottom",
         "text-halign": "center",
-        "text-margin-y": "8px",
-        "text-outline-color": "#000",
-        "text-outline-width": 4,
-        "width": 40,
-        "height": 40,
-        "border-width": 3,
-        "border-color": "rgba(255,255,255,0.8)",
-        "border-opacity": 0.6,
-        "underlay-color": "#ffffff",
-        "underlay-padding": 6,
-        "underlay-opacity": 0.1,
-        "underlay-shape": "ellipse",
+        "text-margin-y": "6px",
+        "width": 14,
+        "height": 14,
+        "border-width": 1,
+        "border-color": "rgba(255,255,255,0.2)",
+        "background-color": "rgba(255,255,255,0.9)",
         "transition-property": "opacity, background-color, width, height, border-width",
-        "transition-duration": "0.4s",
-        "opacity": 1
+        "transition-duration": "0.3s",
+        "opacity": 0.8
       }
     },
-    { selector: 'node[cluster = 0]', style: { 'background-color': '#00F5FF' } },
-    { selector: 'node[cluster = 1]', style: { 'background-color': '#FF00E5' } },
-    { selector: 'node[cluster = 2]', style: { 'background-color': '#00FF41' } },
-    { selector: 'node[cluster = 3]', style: { 'background-color': '#FFD700' } },
-    { selector: 'node[cluster = 4]', style: { 'background-color': '#FF4500' } },
+    { selector: 'node[cluster = 0]', style: { 'background-color': '#e0f7fa', 'border-color': '#00F5FF' } },
+    { selector: 'node[cluster = 1]', style: { 'background-color': '#b3e5fc', 'border-color': '#3b82f6' } },
+    { selector: 'node[cluster = 2]', style: { 'background-color': '#e2e8f0', 'border-color': '#94a3b8' } },
+    { selector: 'node[cluster = 3]', style: { 'background-color': '#f8fafc', 'border-color': '#cbd5e1' } },
+    { selector: 'node[cluster = 4]', style: { 'background-color': '#f1f5f9', 'border-color': '#64748b' } },
     {
-      selector: "node.root-node",
+      selector: "node[isRoot = 'true']",
       style: {
-        "width": 80,
-        "height": 80,
-        "font-size": "16px",
+        "width": 30,
+        "height": 30,
+        "font-size": "14px",
         "font-weight": "900",
+        "color": "#ffffff",
         "background-color": "#ffffff",
-        "border-width": 6,
+        "border-width": 3,
         "border-color": "#00F5FF",
         "border-opacity": 1,
         "underlay-color": "#00F5FF",
         "underlay-padding": 15,
-        "underlay-opacity": 0.3
+        "underlay-opacity": 0.4
       }
     },
     {
       selector: "edge",
       style: {
-        "curve-style": "unbundled-bezier",
-        "target-arrow-shape": "triangle",
-        "arrow-scale": 1.2,
+        "curve-style": "bezier",
         "transition-property": "opacity, line-color, width",
-        "transition-duration": "0.4s"
+        "transition-duration": "0.3s"
       }
     },
     {
-      selector: "edge.structural-edge",
+      selector: "edge[structural = 'true']",
       style: {
-        "width": 1.5,
-        "line-color": "rgba(255,255,255,0.15)",
+        "width": 2,
+        "line-color": "#00F5FF",
         "line-style": "dashed",
         "target-arrow-shape": "none",
-        "opacity": 0.4
+        "opacity": 0.8
       }
     },
     {
-      selector: "edge.standard-edge",
+      selector: "edge[structural = 'false']",
       style: {
         "width": 2.5,
         "line-color": "#00F5FF",
         "line-style": "solid",
+        "target-arrow-shape": "triangle",
         "target-arrow-color": "#00F5FF",
-        "opacity": 0.7
+        "opacity": 0.9
       }
     },
     {
@@ -198,7 +197,7 @@ export const CytoscapeCanvas = () => {
       selector: "edge.highlighted",
       style: {
         "opacity": 1,
-        "width": 4,
+        "width": 1.5,
         "line-color": "#00F5FF"
       }
     }
@@ -251,15 +250,22 @@ export const CytoscapeCanvas = () => {
         stylesheet={stylesheet}
         cy={(cy) => { cyRef.current = cy; }}
         layout={{ 
-          name: "concentric", 
-          animate: true,
-          animationDuration: 600,
-          concentric: (node: any) => {
-            return node.hasClass("root-node") ? 200 : Math.max(10, node.degree() * 10); // Root forcefully dominates center ring
+          name: "cose", 
+          animate: false,
+          nodeRepulsion: function(node: any) { 
+             return node.data("isRoot") === "true" ? 8000 : 4000; 
           },
-          levelWidth: () => 10,
-          padding: 80,
-          minNodeSpacing: 60
+          idealEdgeLength: function(edge: any) { 
+             return edge.data("structural") === "true" ? 100 : 150; 
+          },
+          edgeElasticity: function() { return 0.45; },
+          nestingFactor: 1.2,
+          gravity: 0.15,
+          numIter: 1000,
+          initialTemp: 200,
+          coolingFactor: 0.95,
+          minTemp: 1.0,
+          padding: 80
         }}
         className="z-10"
       />

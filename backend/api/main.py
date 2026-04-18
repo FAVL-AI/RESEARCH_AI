@@ -378,8 +378,10 @@ governance_agent = GovernanceAgent()
 
 # Initialize specialized agents for endpoints
 from agents.researcher import ResearcherAgent, ConnectorAgent
+from agents.ghostwriter import GhostwriterAgent
 researcher = ResearcherAgent(STORAGE_PATH)
 connector = ConnectorAgent()
+ghostwriter = GhostwriterAgent()
 
 def ask_gemma(prompt: str, system_context: str = "Assistant"):
     """Helper to route LLM calls through the primary planner."""
@@ -798,6 +800,45 @@ async def generate_synthesis(payload: dict):
 @app.post("/api/agent/patent")
 async def agent_patent(payload: AgentQuery):
     """Generates a formal patent draft for a topic."""
+    
+# --- GHOSTWRITER SUITE ---
+class GhostwriterPayload(BaseModel):
+    text: str
+    tone: str = "Academic"
+
+@app.post("/api/ghostwriter/scan")
+async def ghostwriter_scan(payload: GhostwriterPayload):
+    """Scans text for AI percentage likelihood."""
+    result = ghostwriter.plagiarism_scan(payload.text)
+    return result
+
+@app.post("/api/ghostwriter/humanize")
+async def ghostwriter_humanize(payload: GhostwriterPayload):
+    """Rewrites text to bypass top AI detectors using burstiness and perplexity algorithms."""
+    humanized = ghostwriter.humanize(payload.text, tone=payload.tone)
+    return {"humanized_text": humanized, "tone": payload.tone, "status": "success"}
+
+# --- LITMAPS PARITY SUITE ---
+@app.get("/api/research/discover")
+async def research_discover(topic: str = ""):
+    """Mock Litmaps 'Discover': Rapidly recommend adjacent literature for a topic."""
+    if not topic:
+        return {"recommendations": []}
+    # Offload to existing explorer search
+    results = swarm.explorer.search(topic, limit=5)
+    return {"recommendations": results}
+
+@app.post("/api/research/monitor")
+async def research_monitor(payload: AgentQuery):
+    """Mock Litmaps 'Monitor': Add a keyword wrapper to active background polling routines."""
+    return {"status": "watching", "keyword": payload.query, "message": f"Successfully registered tracker for '{payload.query}'"}
+
+@app.post("/api/research/share")
+async def research_share(payload: dict):
+    """Mock Litmaps 'Share': Generates a snapshot summary of the current graph."""
+    node_ids = payload.get("nodes", [])
+    return {"status": "success", "share_url": f"https://researchai.local/share/{hash(str(node_ids))}"}
+
     # Find relevant papers first
     papers = (await swarm.run_query(payload.query))["nodes"]
     proposal = swarm.planner.generate_proposal(payload.query, papers)

@@ -26,6 +26,7 @@ interface AppState {
   researchMode: 'fast' | 'deep';
   activeSources: any[];
   studioArtifacts: any[];
+  activeTrackers: string[];
   
   // Actions
   setGraphData: (data: GraphData) => void;
@@ -40,6 +41,9 @@ interface AppState {
   setResearchMode: (mode: 'fast' | 'deep') => void;
   setActiveSources: (sources: any[]) => void;
   addStudioArtifact: (artifact: any) => void;
+  addTracker: (topic: string) => void;
+  removeTracker: (topic: string) => void;
+  addNodeToGraph: (node: any, targetId?: string) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -51,11 +55,14 @@ export const useStore = create<AppState>((set) => ({
   researchMode: 'fast',
   activeSources: [],
   studioArtifacts: [],
+  activeTrackers: [],
 
   setGraphData: (data) => set({ graphData: data }),
   setResearchMode: (mode) => set({ researchMode: mode }),
   setActiveSources: (sources) => set({ activeSources: sources }),
   addStudioArtifact: (art) => set((s) => ({ studioArtifacts: [art, ...s.studioArtifacts] })),
+  addTracker: (topic) => set((state) => ({ activeTrackers: Array.from(new Set([...state.activeTrackers, topic])) })),
+  removeTracker: (topic) => set((state) => ({ activeTrackers: state.activeTrackers.filter(t => t !== topic) })),
   
   addNodes: (newNodes) => set((state) => {
     const existingNodes = new Map(state.graphData.nodes.map(n => [n.id, n]));
@@ -87,6 +94,32 @@ export const useStore = create<AppState>((set) => ({
       graphData: {
         ...state.graphData,
         links: [...state.graphData.links, ...uniqueLinks]
+      }
+    };
+  }),
+
+  addNodeToGraph: (node, targetId) => set((state) => {
+    // Add Node
+    const existingNodes = new Map(state.graphData.nodes.map(n => [n.id, n]));
+    if (!existingNodes.has(node.id)) {
+        const score = (node as any).metadata?.score || 0;
+        const radius = 15 + Math.min(20, Math.log1p(score) * 4);
+        existingNodes.set(node.id, { ...node, val: radius, type: node.type || 'paper' });
+    }
+
+    // Connect node to active target if required
+    let newLinks = [...state.graphData.links];
+    if (targetId) {
+       const linkExists = newLinks.some(l => (l.source === node.id && l.target === targetId) || (l.target === node.id && l.source === targetId));
+       if (!linkExists) {
+         newLinks.push({ source: targetId, target: node.id });
+       }
+    }
+
+    return {
+      graphData: {
+        nodes: Array.from(existingNodes.values()),
+        links: newLinks
       }
     };
   }),

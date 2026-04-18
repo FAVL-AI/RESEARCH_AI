@@ -12,7 +12,10 @@ import {
   ChevronLeft, 
   ChevronRight,
   Search,
-  LayoutDashboard
+  LayoutDashboard,
+  PenTool,
+  Map,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -32,6 +35,9 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
     { icon: Box, label: "Wiki Brain", href: "/dashboard/wiki" },
     { icon: Library, label: "Archive", href: "/dashboard/papers" },
     { icon: Bot, label: "Orchestrator", href: "/dashboard/agents" },
+    { icon: Map, label: "Literature Recon", href: "/dashboard/litmaps" },
+    { icon: PenTool, label: "Ghostwriter", href: "/dashboard/ghostwriter" },
+    { icon: BookOpen, label: "Documentation", href: "/dashboard/docs" },
     { icon: Settings, label: "Settings", href: "/dashboard/settings" },
   ];
 

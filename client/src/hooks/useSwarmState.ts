@@ -8,7 +8,11 @@ export const useSwarmState = () => {
     const wsRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
+        let timeoutPath: NodeJS.Timeout;
+
         const connect = () => {
+            if (!isMounted) return;
             console.log("[WebSocket] Connecting to Swarm Infrastructure...");
             const ws = new WebSocket(WS_URL);
             wsRef.current = ws;
@@ -18,24 +22,16 @@ export const useSwarmState = () => {
                 
                 switch (message.type) {
                     case "sync":
-                        // Initial hydration of logs and graph
-                        if (message.data.logs) {
-                            message.data.logs.forEach((log: any) => addLog(log));
-                        }
-                        if (message.data.graph) {
-                            setGraphData(message.data.graph);
-                        }
+                        if (message.data.logs) message.data.logs.forEach((log: any) => addLog(log));
+                        if (message.data.graph) setGraphData(message.data.graph);
                         break;
-                        
                     case "log":
                     case "agent_log":
                         addLog(message.type === "agent_log" ? message : message.data);
                         break;
-                        
                     case "graph_update":
                         setGraphData(message.data);
                         break;
-
                     case "supervisor_action":
                         addLog({
                             message: `Supervisor decision recorded: ${message.decision}`,
@@ -43,24 +39,23 @@ export const useSwarmState = () => {
                             timestamp: new Date().toISOString()
                         });
                         break;
-                        
                     case "reset":
                         clearLogs();
                         setGraphData({ nodes: [], links: [] });
                         break;
-                        
                     default:
                         console.warn("[WebSocket] Unknown message type:", message.type);
                 }
             };
 
             ws.onclose = () => {
+                if (!isMounted) return;
                 console.log("[WebSocket] Disconnected. Reconnecting in 3s...");
-                setTimeout(connect, 3000);
+                timeoutPath = setTimeout(connect, 3000);
             };
 
             ws.onerror = (err) => {
-                console.error("[WebSocket] Error:", err);
+                // The onclose hook handles reconnection, just close here
                 ws.close();
             };
         };
@@ -68,7 +63,11 @@ export const useSwarmState = () => {
         connect();
 
         return () => {
+            isMounted = false;
+            clearTimeout(timeoutPath);
             if (wsRef.current) {
+                // Nullify onclose hook immediately so explicit close doesn't trigger a reconnect timeout
+                wsRef.current.onclose = null;
                 wsRef.current.close();
             }
         };
