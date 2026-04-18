@@ -1,0 +1,19 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install redis rq requests sentence-transformers torch pydantic pandas lancedb semanticscholar arxiv
+
+COPY . .
+
+# Environment variable to specify this is a worker
+ENV IS_WORKER=true
+
+CMD ["python3", "backend/worker.py"]

@@ -5,6 +5,7 @@ import { Bot, Send, Mic, Paperclip, Minimize2, Maximize2, X } from "lucide-react
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { io, Socket } from "socket.io-client";
+import { useStore } from "@/store/useStore";
 
 interface LogEntry {
   message: string;
@@ -15,20 +16,19 @@ export const AIPanel = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [input, setInput] = useState("");
-  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
-
+  const { logs: globalLogs, addLog, clearLogs } = useStore();
   const [messages, setMessages] = useState([
     { role: "assistant", text: "System initialized. I am your Memory Agent. How can I assist your research today?" }
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:3001");
+    const newSocket = io("http://127.0.0.1:8000");
     setSocket(newSocket);
 
     newSocket.on("agent:log", (log: LogEntry) => {
-      setLogs(prev => [...prev.slice(-4), log]);
+      addLog(log);
     });
 
     newSocket.on("agent:result", (result: any) => {
@@ -44,12 +44,13 @@ export const AIPanel = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, logs]);
+  }, [messages, globalLogs]);
 
   const handleSend = () => {
     if (!input.trim() || !socket) return;
     setMessages([...messages, { role: "user", text: input }]);
-    setLogs([{ message: 'Initializing research agents...', status: 'loading' }]);
+    clearLogs();
+    addLog({ message: 'Initializing research swarm...', status: 'loading' });
     
     socket.emit('agent:query', { query: input, id: Date.now().toString() });
     
@@ -98,10 +99,10 @@ export const AIPanel = () => {
 
       {!isMinimized && (
         <>
-          {/* Agent Activity Log */}
+          {/* Recent Activity Mini-Log */}
           <div className="px-4 py-2 bg-accent/5 border-b border-white/5">
             <div className="flex flex-col gap-1">
-              {logs.map((log, i) => (
+              {globalLogs.slice(0, 3).map((log, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <span className="text-[10px] font-mono text-accent/60 truncate opacity-80">{log.message}</span>
                   {log.status === 'loading' && <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse shrink-0" />}

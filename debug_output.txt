@@ -1,0 +1,44 @@
+INFO:     Started server process [55413]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('0.0.0.0', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+[!] Redis unavailable (Error 61 connecting to localhost:6379. Connection refused.). Running in Safe Mode (Local Only).
+[*] Table 'nodes' already exists or other DB init error (non-fatal): Table 'nodes' already exists
+[!] Skipping Redis listener (Safe Mode)
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished name='Task-1' coro=<Server.serve() done, defined at /Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/server.py:69> exception=SystemExit(1)>
+Traceback (most recent call last):
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/server.py", line 164, in startup
+    server = await loop.create_server(
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 1494, in create_server
+    raise OSError(err.errno, 'error while attempting '
+OSError: [Errno 48] error while attempting to bind on address ('0.0.0.0', 8000): address already in use
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/main.py", line 593, in run
+    server.run()
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/server.py", line 67, in run
+    return asyncio_run(self.serve(sockets=sockets), loop_factory=self.config.get_loop_factory())
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/_compat.py", line 60, in asyncio_run
+    return loop.run_until_complete(main)
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/nest_asyncio.py", line 92, in run_until_complete
+    self._run_once()
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/nest_asyncio.py", line 133, in _run_once
+    handle._run()
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/tasks.py", line 339, in __wakeup
+    self.__step()
+  File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/tasks.py", line 256, in __step
+    result = coro.send(None)
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/server.py", line 71, in serve
+    await self._serve(sockets)
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/server.py", line 86, in _serve
+    await self.startup(sockets=sockets)
+  File "/Users/favl/Library/Python/3.9/lib/python/site-packages/uvicorn/server.py", line 174, in startup
+    sys.exit(1)
+SystemExit: 1
