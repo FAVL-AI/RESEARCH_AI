@@ -33,15 +33,15 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="p-10 h-full overflow-y-auto no-scrollbar bg-[#050505]">
+    <div className="p-10 h-full overflow-y-auto no-scrollbar bg-white dark:bg-[#050505]">
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-accent/20 rounded-lg">
             <Settings className="text-accent" size={24} />
           </div>
-          <h1 className="text-3xl font-black tracking-tight">System_Configuration</h1>
+          <h1 className="text-3xl font-black tracking-tight text-black dark:text-white">System_Configuration</h1>
         </div>
-        <p className="text-white/40 text-sm max-w-2xl">
+        <p className="text-black/60 dark:text-white/40 text-sm max-w-2xl">
           Calibrate the autonomous research layer, institutional gateways, and cognitive constraints.
         </p>
       </header>
@@ -58,7 +58,7 @@ export default function SettingsPage() {
            </div>
            
            <div className="space-y-4 relative z-10">
-              <p className="text-xs text-white/60 max-w-xl mb-4">
+              <p className="text-xs text-black/70 dark:text-white/60 max-w-xl mb-4">
                 Configure your University/Institution Library Proxy to resolve gated research papers and DOI links autonomously.
               </p>
               <div className="flex gap-3">
@@ -67,7 +67,7 @@ export default function SettingsPage() {
                   value={proxyUrl}
                   onChange={(e) => setProxyUrl(e.target.value)}
                   placeholder="https://proxy.lib.youruni.edu/login?url="
-                  className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-accent/40 outline-none transition-all font-mono"
+                  className="flex-1 bg-black/5 dark:bg-black/40 border border-black/10 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-black dark:text-white placeholder-black/30 dark:placeholder-white/30 focus:border-accent/40 outline-none transition-all font-mono"
                  />
                  <button 
                   onClick={handleSaveProxy}
@@ -78,21 +78,21 @@ export default function SettingsPage() {
                    <Save size={14} />
                  </button>
               </div>
-              <p className="text-[9px] text-white/20 uppercase tracking-widest">Example: https://proxy.lib.university.edu/login?url=</p>
+              <p className="text-[9px] text-black/40 dark:text-white/20 uppercase tracking-widest">Example: https://proxy.lib.university.edu/login?url=</p>
            </div>
         </div>
 
         {/* Existing Groups */}
         {settingsGroups.map((group, i) => (
-          <div key={i} className="p-8 bg-white/2 border border-white/5 rounded-3xl">
+          <div key={i} className="p-8 bg-black/5 dark:bg-white/2 border border-black/10 dark:border-white/5 rounded-3xl">
             <div className="flex items-center gap-3 mb-6">
-              <group.icon className="text-white/40" size={20} />
-              <h2 className="text-[10px] font-black tracking-[0.3em] uppercase text-white/40">{group.title}</h2>
+              <group.icon className="text-black/40 dark:text-white/40" size={20} />
+              <h2 className="text-[10px] font-black tracking-[0.3em] uppercase text-black/40 dark:text-white/40">{group.title}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                {group.options.map((opt, j) => (
-                 <div key={j} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl text-sm">
-                   <span className="text-white/60">{opt}</span>
+                 <div key={j} className="flex items-center justify-between p-4 bg-white dark:bg-white/5 border border-black/5 dark:border-white/5 rounded-xl text-sm">
+                   <span className="text-black/70 dark:text-white/60">{opt}</span>
                    <Sliders size={14} className="text-accent/20" />
                  </div>
                ))}
@@ -101,7 +101,7 @@ export default function SettingsPage() {
         ))}
         
         <div className="pt-4">
-          <button className="w-full py-4 bg-white/5 border border-white/10 text-white/40 font-black uppercase tracking-widest rounded-2xl hover:bg-white/10 transition-all">
+          <button className="w-full py-4 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-black/40 dark:text-white/40 font-black uppercase tracking-widest rounded-2xl hover:bg-black/10 dark:hover:bg-white/10 transition-all">
             Commit Global Infrastructure State
           </button>
         </div>

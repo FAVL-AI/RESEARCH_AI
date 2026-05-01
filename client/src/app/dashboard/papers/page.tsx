@@ -37,15 +37,15 @@ export default function PapersArchive() {
   }, []);
 
   return (
-    <div className="p-10 h-full overflow-y-auto no-scrollbar bg-[#050505]">
+    <div className="p-10 h-full overflow-y-auto no-scrollbar bg-white dark:bg-[#050505]">
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-accent/20 rounded-lg">
             <Library className="text-accent" size={24} />
           </div>
-          <h1 className="text-3xl font-black tracking-tight">Research_Archive</h1>
+          <h1 className="text-3xl font-black tracking-tight text-black dark:text-white">Research_Archive</h1>
         </div>
-        <p className="text-white/40 max-w-xl">
+        <p className="text-black/60 dark:text-white/40 max-w-xl">
           Complete index of ingested research papers, citation networks, and distilled concepts.
         </p>
       </header>
@@ -58,9 +58,9 @@ export default function PapersArchive() {
           { label: "Wiki Nodes", value: "0" },
           { label: "Crawled Sources", value: "1" },
         ].map((stat, i) => (
-          <div key={i} className="p-6 bg-white/2 border border-white/5 rounded-2xl">
-            <div className="text-[10px] font-black tracking-[0.2em] text-white/20 uppercase mb-2">{stat.label}</div>
-            <div className="text-2xl font-black font-mono">{stat.value}</div>
+          <div key={i} className="p-6 bg-black/5 dark:bg-white/2 border border-black/10 dark:border-white/5 rounded-2xl">
+            <div className="text-[10px] font-black tracking-[0.2em] text-black/40 dark:text-white/20 uppercase mb-2">{stat.label}</div>
+            <div className="text-2xl font-black font-mono text-black dark:text-white">{stat.value}</div>
           </div>
         ))}
       </div>
@@ -75,18 +75,18 @@ export default function PapersArchive() {
             <Link 
               key={paper.id}
               href={`/dashboard/paper/${paper.id}`}
-              className="group p-6 bg-white/2 border border-white/5 rounded-2xl hover:bg-white/5 hover:border-accent/30 transition-all block relative overflow-hidden"
+              className="group p-6 bg-black/5 dark:bg-white/2 border border-black/10 dark:border-white/5 rounded-2xl hover:bg-black/10 hover:border-accent/30 dark:hover:bg-white/5 dark:hover:border-accent/30 transition-all block relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <ExternalLink size={16} className="text-accent" />
               </div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="text-[9px] font-black font-mono text-accent uppercase tracking-widest bg-accent/10 px-2 py-0.5 rounded">PDF</div>
-                <div className="text-[9px] font-black font-mono text-white/20 uppercase tracking-widest">{paper.id}</div>
+                <div className="text-[9px] font-black font-mono text-black/40 dark:text-white/20 uppercase tracking-widest">{paper.id}</div>
               </div>
-              <h3 className="font-bold text-lg mb-4 line-clamp-2 leading-tight group-hover:text-accent transition-colors">{paper.title}</h3>
+              <h3 className="font-bold text-lg mb-4 line-clamp-2 leading-tight text-black dark:text-white group-hover:text-accent transition-colors">{paper.title}</h3>
               
-              <div className="flex items-center gap-4 text-white/40">
+              <div className="flex items-center gap-4 text-black/60 dark:text-white/40">
                 <div className="flex items-center gap-1.5 text-[10px]">
                   <User size={12} />
                   <span className="truncate max-w-[100px]">{paper.metadata?.authors?.[0] || "Unknown"}</span>

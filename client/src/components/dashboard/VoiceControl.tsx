@@ -40,7 +40,7 @@ export const VoiceControl = ({ onCommand }: { onCommand: (cmd: string) => void }
   return (
     <button 
       onClick={toggleListening}
-      className={`p-2 rounded-full transition-all ${isListening ? "bg-red-500/20 text-red-500 animate-pulse" : "hover:bg-white/10 text-white/40"}`}
+      className={`p-2 rounded-full transition-all ${isListening ? "bg-red-500/20 text-red-500 animate-pulse" : "hover:bg-black/10 dark:bg-white/10 text-black/60 dark:text-white/40"}`}
     >
       {isListening ? <MicOff size={18} /> : <Mic size={18} />}
     </button>

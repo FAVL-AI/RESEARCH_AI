@@ -13,9 +13,12 @@ crossrefapi
 pandas
 redis
 rq
-lancedb
+lancedb==0.8.2
 sentence-transformers
 uvicorn
 fastapi
 GitPython
 python-dotenv
+arxiv
+semanticscholar
+websockets

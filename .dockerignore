@@ -1,0 +1,9 @@
+.git
+client/node_modules
+server-node/node_modules
+client/.next
+lancedb
+data
+memory
+backend/__pycache__
+*.log

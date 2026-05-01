@@ -8,6 +8,15 @@
       "token_provided": false,
       "added_at": "2026-04-18T01:41:56.595743",
       "status": "pending"
+    },
+    {
+      "id": "gitlab_1777568492",
+      "type": "gitlab",
+      "url": "",
+      "name": "",
+      "token_provided": false,
+      "added_at": "2026-04-30T17:01:32.816456",
+      "status": "pending"
     }
   ],
   "last_sync": null

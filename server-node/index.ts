@@ -40,6 +40,10 @@ function connectToPython() {
     console.log('[Orchestrator] Connected to Python Swarm WebSocket');
   });
 
+  pythonWs.on('error', (err) => {
+    console.error('[Orchestrator] Python WS error:', err.message);
+  });
+
   pythonWs.on('message', (data: string) => {
     try {
       const log = JSON.parse(data);

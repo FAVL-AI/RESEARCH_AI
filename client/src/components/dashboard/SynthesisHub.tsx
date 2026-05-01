@@ -53,7 +53,7 @@ export const SynthesisHub = () => {
           >
             <button
               onClick={runSynthesis}
-              className="pointer-events-auto flex items-center gap-2 px-6 py-2.5 bg-accent/10 backdrop-blur-3xl border border-accent/20 rounded-full text-[10px] font-black tracking-[0.2em] text-accent hover:bg-accent hover:text-black transition-all shadow-2xl"
+              className="pointer-events-auto flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-[#0a0a0a]ccent/10 backdrop-blur-3xl border border-accent/20 rounded-full text-[10px] font-black tracking-[0.2em] text-accent hover:bg-white dark:bg-[#0a0a0a]ccent hover:text-black transition-all shadow-2xl"
             >
               <Brain size={14} />
               DISCOVER_GAPS
@@ -73,9 +73,9 @@ export const SynthesisHub = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="pointer-events-auto bg-black/80 backdrop-blur-3xl border border-white/10 p-8 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10"
+          className="pointer-events-auto bg-black/80 backdrop-blur-3xl border border-black/10 dark:border-white/10 p-8 rounded-3xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10"
         >
-          <div className="flex items-center justify-between mb-8 sticky top-0 bg-black/20 backdrop-blur-xl py-2 z-10">
+          <div className="flex items-center justify-between mb-8 sticky top-0 bg-black/5 dark:bg-black/20 backdrop-blur-xl py-2 z-10">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-cyan-500/20 rounded-lg">
                 {fullReport ? <Zap className="text-cyan-400" size={18} /> : <Brain className="text-accent" size={18} />}
@@ -84,14 +84,14 @@ export const SynthesisHub = () => {
                 {fullReport ? "Sovereign_Intelligence_Synthesis" : "Structural_Gap_Analysis"}
               </h2>
             </div>
-            <button onClick={() => { setSynthesis(null); setFullReport(null); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-              <RotateCcw size={16} className="text-white/40" />
+            <button onClick={() => { setSynthesis(null); setFullReport(null); }} className="p-2 hover:bg-black/10 dark:bg-white/10 rounded-full transition-colors">
+              <RotateCcw size={16} className="text-black/60 dark:text-white/40" />
             </button>
           </div>
 
           {fullReport ? (
-            <div className="prose prose-invert max-w-none text-white/80 space-y-6">
-              <pre className="whitespace-pre-wrap font-sans leading-relaxed text-[13px] bg-white/5 p-6 rounded-2xl border border-white/5">
+            <div className="prose prose-invert max-w-none text-black/80 dark:text-white/80 space-y-6">
+              <pre className="whitespace-pre-wrap font-sans leading-relaxed text-[13px] bg-black/5 dark:bg-white/5 p-6 rounded-2xl border border-black/5 dark:border-white/5">
                 {fullReport.report}
               </pre>
             </div>
@@ -107,10 +107,10 @@ export const SynthesisHub = () => {
                   {synthesis && synthesis.contradictions && synthesis.contradictions.length > 0 ? synthesis.contradictions.map((c: any, i: number) => (
                     <div key={i} className="p-4 bg-red-500/5 border border-red-500/10 rounded-xl text-[11px] leading-relaxed">
                       <div className="font-bold text-red-400 mb-1">Conflict Found</div>
-                      <p className="text-white/60 line-clamp-3">{c.reason}</p>
+                      <p className="text-black/70 dark:text-white/60 line-clamp-3">{c.reason}</p>
                     </div>
                   )) : (
-                     <p className="text-[10px] text-white/20 italic">No direct claim conflicts identified.</p>
+                     <p className="text-[10px] text-black/40 dark:text-white/20 italic">No direct claim conflicts identified.</p>
                   )}
                 </div>
               </section>
@@ -123,9 +123,9 @@ export const SynthesisHub = () => {
                 </div>
                 <div className="space-y-3">
                   {synthesis && synthesis.gaps?.map((gap: any, i: number) => (
-                    <div key={i} className="p-4 bg-accent/5 border border-accent/10 rounded-xl text-[11px] leading-relaxed">
+                    <div key={i} className="p-4 bg-white dark:bg-[#0a0a0a]ccent/5 border border-accent/10 rounded-xl text-[11px] leading-relaxed">
                       <div className="font-bold text-accent mb-1 italic">Gap Hypothesis #{i+1}</div>
-                      <p className="text-white/60 line-clamp-4">{gap.hypothesis}</p>
+                      <p className="text-black/70 dark:text-white/60 line-clamp-4">{gap.hypothesis}</p>
                     </div>
                   ))}
                 </div>
@@ -133,23 +133,23 @@ export const SynthesisHub = () => {
             </div>
           )}
 
-          <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+          <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
              <div className="flex items-center gap-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[7px] font-black text-white/20 uppercase tracking-widest">Confidence Score</span>
+                  <span className="text-[7px] font-black text-black/40 dark:text-white/20 uppercase tracking-widest">Confidence Score</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="w-16 h-1 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-accent transition-all duration-1000" 
+                        className="h-full bg-white dark:bg-[#0a0a0a]ccent transition-all duration-1000" 
                         style={{ width: `${(fullReport ? 0.98 : 0.92) * 100}%` }} 
                       />
                     </div>
                     <span className="text-[10px] font-mono text-accent">{fullReport ? "0.98" : "0.92"}</span>
                   </div>
                 </div>
-                <div className="h-6 w-px bg-white/5" />
-                <div className="text-[9px] font-mono text-white/40 uppercase">
-                  Grounding: <span className="text-white/80">SOTA_VERIFIED</span>
+                <div className="h-6 w-px bg-black/5 dark:bg-white/5" />
+                <div className="text-[9px] font-mono text-black/60 dark:text-white/40 uppercase">
+                  Grounding: <span className="text-black/80 dark:text-white/80">SOTA_VERIFIED</span>
                 </div>
              </div>
              <button className="flex items-center gap-2 text-[10px] font-bold text-cyan-400 hover:text-cyan-300 transition-colors">

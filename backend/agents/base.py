@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), '.env')
+load_dotenv(env_path)
+
 import time
 import requests
 import json
@@ -109,7 +113,7 @@ Return a one-sentence 'Lesson Learned'.
             try:
                 import google.generativeai as genai
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel('gemini-1.5-pro-latest')
+                model = genai.GenerativeModel('gemini-1.5-pro')
                 response = model.generate_content(f"{full_system_prompt}\n\n{prompt}")
                 if response.text:
                     return response.text

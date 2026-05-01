@@ -16,7 +16,7 @@ export default function DashboardLayout({
   const [studioCollapsed, setStudioCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen w-full bg-black text-white overflow-hidden font-sans border-0">
+    <div className="flex h-screen w-full bg-background text-foreground overflow-hidden font-sans border-0 transition-colors duration-300">
       {/* 0. MINI NAV RAIL */}
       <Sidebar collapsed={navCollapsed} setCollapsed={setNavCollapsed} />
 
@@ -27,7 +27,7 @@ export default function DashboardLayout({
       />
 
       {/* 2. MAIN STAGE */}
-      <main className="flex-1 relative overflow-hidden bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)] border-x border-white/5">
+      <main className="flex-1 relative overflow-hidden bg-white dark:bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)] border-x border-black/5 dark:border-white/5 transition-colors duration-300">
         {children}
       </main>
 

@@ -40,7 +40,7 @@ export default function WikiPage() {
     <div className="p-10 h-full overflow-y-auto no-scrollbar bg-[#050505]">
        <header className="mb-10 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.back()} className="p-2 hover:bg-white/10 rounded-full"><ArrowLeft size={20} /></button>
+          <button aria-label="Go back" onClick={() => router.back()} className="p-2 hover:bg-white/10 rounded-full"><ArrowLeft size={20} /></button>
           <div className="flex items-center gap-3">
              <div className="p-2 bg-accent/20 rounded-lg"><BookOpen className="text-accent" size={24} /></div>
              <h1 className="text-3xl font-black tracking-tight">{node?.title || id?.toString().replace(/_/g, " ")}</h1>

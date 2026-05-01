@@ -238,17 +238,16 @@ export const CytoscapeCanvas = () => {
   }, [router]);
 
   return (
-    <div className="w-full h-full bg-[#030303] relative overflow-hidden group">
+    <div className="w-full h-full bg-transparent relative overflow-hidden group">
       {/* Background Grid */}
-      <div className="absolute inset-0 opacity-[0.02] pointer-events-none" 
-           style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <div className="absolute inset-0 opacity-[0.05] dark:opacity-[0.02] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiMwMDAiLz48L3N2Zz4=')] dark:bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')]" />
       
       <CytoscapeComponent
         key={`${elements.length}-${rootNodeId || "default"}`}
         elements={elements}
         style={{ width: "100%", height: "100%" }}
         stylesheet={stylesheet}
-        cy={(cy) => { cyRef.current = cy; }}
+        cy={(cy: any) => { cyRef.current = cy; }}
         layout={{ 
           name: "cose", 
           animate: false,
@@ -275,7 +274,7 @@ export const CytoscapeCanvas = () => {
          <button 
           onClick={handleCluster}
           disabled={clustering}
-          className="px-4 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-xl text-[10px] font-black tracking-widest text-white/60 hover:text-accent hover:border-accent/40 transition-all flex items-center gap-2"
+          className="px-4 py-2 bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-xl text-[10px] font-black tracking-widest text-black/70 dark:text-white/60 hover:text-accent hover:border-accent/40 transition-all flex items-center gap-2"
          >
            <Bot size={14} className={clustering ? "animate-spin" : ""} />
            {clustering ? "CLUSTERING..." : "IDENTIFY_CLUSTERS"}
@@ -284,20 +283,21 @@ export const CytoscapeCanvas = () => {
 
       {/* Context Menu */}
       {contextMenu && (
-        <div 
-          className="absolute bg-black/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 z-50 shadow-2xl min-w-[200px] animate-in zoom-in-95 duration-200"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-        >
-          <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 mb-1">
-             <span className="text-[9px] font-black text-white/40 uppercase tracking-tighter">Node_Intelligence</span>
-             <button onClick={() => setContextMenu(null)}><X size={12} className="text-white/20" /></button>
+        <>
+          <style>{`
+            .cytoscape-context-menu { left: ${contextMenu.x}px; top: ${contextMenu.y}px; }
+          `}</style>
+          <div className="absolute bg-black/90 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-2xl p-2 z-50 shadow-2xl min-w-[200px] animate-in zoom-in-95 duration-200 cytoscape-context-menu">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-black/5 dark:border-white/5 mb-1">
+             <span className="text-[9px] font-black text-black/60 dark:text-white/40 uppercase tracking-tighter">Node_Intelligence</span>
+             <button aria-label="Close Context Menu" onClick={() => setContextMenu(null)}><X size={12} className="text-black/40 dark:text-white/20" /></button>
           </div>
           <button 
             onClick={() => router.push(`/dashboard/paper/${contextMenu.nodeId}`)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-left transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-black/5 dark:bg-white/5 rounded-xl text-left transition-colors"
           >
             <ExternalLink size={14} className="text-accent" />
-            <span className="text-xs font-bold text-white/80">Open in Reader</span>
+            <span className="text-xs font-bold text-black/80 dark:text-white/80">Open in Reader</span>
           </button>
           <button 
             onClick={async () => {
@@ -305,10 +305,10 @@ export const CytoscapeCanvas = () => {
               alert(res.data.summary);
               setContextMenu(null);
             }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-left transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-black/5 dark:bg-white/5 rounded-xl text-left transition-colors"
           >
             <Zap size={14} className="text-accent" />
-            <span className="text-xs font-bold text-white/80">Analyze & Summarize</span>
+            <span className="text-xs font-bold text-black/80 dark:text-white/80">Analyze & Summarize</span>
           </button>
           <button 
             onClick={async () => {
@@ -316,26 +316,27 @@ export const CytoscapeCanvas = () => {
               alert(res.data.citation);
               setContextMenu(null);
             }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 rounded-xl text-left transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-black/5 dark:bg-white/5 rounded-xl text-left transition-colors"
           >
             <Quote size={14} className="text-accent" />
-            <span className="text-xs font-bold text-white/80">Generate Citation</span>
+            <span className="text-xs font-bold text-black/80 dark:text-white/80">Generate Citation</span>
           </button>
         </div>
+        </>
       )}
 
       {/* Legend */}
-      <div className="absolute bottom-6 left-6 p-4 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl z-20">
+      <div className="absolute bottom-6 left-6 p-4 bg-black/5 dark:bg-black/40 backdrop-blur-md border border-black/10 dark:border-white/10 rounded-2xl z-20">
         <div className="flex flex-col gap-2">
-           <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">Cognitive_Key</p>
+           <p className="text-[8px] font-black text-black/40 dark:text-white/20 uppercase tracking-[0.2em] mb-1">Cognitive_Key</p>
            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-[#00F5FF]" />
-                <span className="text-[10px] text-white/40 font-bold">Research_Node</span>
+                <span className="text-[10px] text-black/60 dark:text-white/40 font-bold">Research_Node</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-white/20" />
-                <span className="text-[10px] text-white/40 font-bold">Citation_Link</span>
+                <span className="text-[10px] text-black/60 dark:text-white/40 font-bold">Citation_Link</span>
               </div>
            </div>
         </div>

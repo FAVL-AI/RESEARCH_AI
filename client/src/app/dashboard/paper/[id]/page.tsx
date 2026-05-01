@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Share2, Download, Maximize2, GitBranch, ExternalLink, Quote, FileText, Globe, Bot, Zap, ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowLeft, Share2, Download, Maximize2, GitBranch, ExternalLink, Quote, FileText, Globe, Bot, Zap, ArrowRight, ChevronDown, X, Search, Lightbulb, PenTool } from "lucide-react";
 import axios from "axios";
 import { CitationModal } from "@/components/dashboard/CitationModal";
 import { useStore } from "@/store/useStore";
@@ -32,8 +32,10 @@ export default function PaperPage() {
   const [resolving, setResolving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [agentResponseModal, setAgentResponseModal] = useState({ open: false, title: "", content: "" });
 
   useEffect(() => {
+    if (!id) return;
     const fetchPaper = async () => {
       try {
         const res = await axios.get(`http://127.0.0.1:8000/api/nodes/${id}`);
@@ -51,7 +53,7 @@ export default function PaperPage() {
     if (expanding) return;
     setExpanding(true);
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/agent/expand`, { id });
+      const res = await axios.post(`http://127.0.0.1:8000/api/agent/expand`, { id: String(id) });
       const { new_nodes, links } = res.data;
       
       const formattedNodes = new_nodes.map((n: any) => ({
@@ -101,7 +103,7 @@ export default function PaperPage() {
   const handleExport = async (format: string) => {
     setExporting(true);
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/research/export`, { id, format });
+      const res = await axios.post(`http://127.0.0.1:8000/api/research/export`, { id: String(id), format });
       window.open(`http://127.0.0.1:8000${res.data.url}`, "_blank");
     } catch (err) {
       console.error("Export failed:", err);
@@ -123,15 +125,16 @@ export default function PaperPage() {
     </div>
   );
 
-  const arxivId = id.toString().replace("arxiv_", "");
+  const arxivId = id?.toString().replace("arxiv_", "") || "";
 
   return (
-    <div className="flex h-full flex-col bg-[#050505] animate-in fade-in duration-500">
+    <div className="flex h-full flex-col bg-white dark:bg-[#050505] animate-in fade-in duration-500">
       {/* Top Header */}
-      <header className="p-4 border-b border-white/5 flex items-center justify-between bg-black/50 backdrop-blur-xl">
+      <header className="p-4 border-b border-black/5 dark:border-white/5 flex items-center justify-between bg-black/5 dark:bg-black/50 backdrop-blur-xl">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.back()}
+            aria-label="Go back"
             className="p-2 hover:bg-white/10 rounded-full transition-colors"
           >
             <ArrowLeft size={20} />
@@ -154,8 +157,8 @@ export default function PaperPage() {
             {expanding ? "EXPANDING..." : "EXPAND LINEAGE"}
           </button>
           <div className="h-6 w-px bg-white/10 mx-2" />
-          <button className="p-2 hover:bg-white/10 rounded-lg text-white/60"><Share2 size={18} /></button>
-          <button className="p-2 hover:bg-white/10 rounded-lg text-white/60"><Download size={18} /></button>
+          <button aria-label="Share" className="p-2 hover:bg-white/10 rounded-lg text-white/60"><Share2 size={18} /></button>
+          <button aria-label="Download" className="p-2 hover:bg-white/10 rounded-lg text-white/60"><Download size={18} /></button>
         </div>
       </header>
 
@@ -164,22 +167,56 @@ export default function PaperPage() {
         {/* Metadata Panel */}
         <div className="w-1/3 border-r border-white/5 p-8 overflow-y-auto no-scrollbar space-y-8 bg-[#080808]">
           
-          {/* Intelligence Actions */}
+           {/* Intelligence Actions */}
           <section className="p-6 bg-accent/5 border border-accent/20 rounded-2xl space-y-4">
              <div className="flex items-center gap-2 mb-2">
                 <Bot size={16} className="text-accent" />
                 <h2 className="text-[10px] font-black tracking-widest text-accent uppercase">Intelligence_Layer</h2>
              </div>
              
+             {/* Read Aloud / Audio Engine */}
+             <div className="flex items-center justify-between p-3 bg-black/40 border border-white/10 rounded-xl mb-4">
+               <div className="flex items-center gap-2">
+                 <Globe size={14} className="text-white/60" />
+                 <span className="text-xs font-bold text-white/80">Audio Reader</span>
+               </div>
+               <button 
+                 onClick={() => {
+                   if ('speechSynthesis' in window) {
+                     window.speechSynthesis.cancel();
+                     const utterance = new SpeechSynthesisUtterance(paper.abstract || paper.content || "No text available to read.");
+                     utterance.rate = 1.1;
+                     utterance.pitch = 1;
+                     window.speechSynthesis.speak(utterance);
+                   } else {
+                     alert("Speech synthesis is not supported in this browser.");
+                   }
+                 }}
+                 className="px-3 py-1 bg-white text-black text-[10px] font-black uppercase rounded-lg hover:scale-105 transition-all"
+               >
+                 Play
+               </button>
+               <button 
+                 onClick={() => {
+                   if ('speechSynthesis' in window) {
+                     window.speechSynthesis.cancel();
+                   }
+                 }}
+                 className="px-3 py-1 bg-white/10 text-white/60 text-[10px] font-black uppercase rounded-lg hover:bg-white/20 transition-all"
+               >
+                 Stop
+               </button>
+             </div>
+
              <div className="grid grid-cols-2 gap-3">
                <button 
                 onClick={async () => {
                   setActionLoading('summarize');
                   try {
-                    const res = await axios.post('http://127.0.0.1:8000/api/agent/summarize', { id });
-                    alert(res.data.summary || "Summary generation completed.");
+                    const res = await axios.post('http://127.0.0.1:8000/api/agent/summarize', { id: String(id) });
+                    setAgentResponseModal({ open: true, title: "Summarization Complete", content: res.data.summary || "Summary generation completed." });
                   } catch (err) {
-                    alert("Failed to summarize this node.");
+                    setAgentResponseModal({ open: true, title: "Error", content: "Failed to summarize this node." });
                   } finally {
                     setActionLoading(null);
                   }
@@ -196,12 +233,13 @@ export default function PaperPage() {
 
                <button 
                 onClick={async () => {
-                  setActionLoading('reproduce');
+                  setActionLoading('methods');
                   try {
-                    const res = await axios.post('http://127.0.0.1:8000/api/agent/reproduce', { id });
-                    alert(`GITHUB REPOS: ${JSON.stringify(res.data.repositories)}\n\nPLAN: ${res.data.plan}`);
+                    // Simulating method extraction for quick scan
+                    const res = await axios.post('http://127.0.0.1:8000/api/agent/qa', { id: String(id), question: "Extract the core methods and methodologies from this paper and highlight the key equations/algorithms." });
+                    setAgentResponseModal({ open: true, title: "Core Methods Extracted", content: res.data.answer });
                   } catch (err) {
-                    alert("Failed to build reproduction plan.");
+                    setAgentResponseModal({ open: true, title: "Error", content: "Failed to extract methods." });
                   } finally {
                     setActionLoading(null);
                   }
@@ -209,36 +247,100 @@ export default function PaperPage() {
                 disabled={actionLoading !== null}
                 className={cn(
                   "py-2.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2",
-                  actionLoading === 'reproduce' && "opacity-50 cursor-wait"
+                  actionLoading === 'methods' && "opacity-50 cursor-wait"
                 )}
                >
-                  <GitBranch size={14} className={cn("text-accent", actionLoading === 'reproduce' && "animate-spin")} />
-                  {actionLoading === 'reproduce' ? "BUILDING PLAN..." : "REPRO_PLAN"}
+                  <Search size={14} className={cn("text-accent", actionLoading === 'methods' && "animate-spin")} />
+                  {actionLoading === 'methods' ? "SCANNING..." : "SCAN METHODS"}
                </button>
              </div>
 
-             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
+             <div className="grid grid-cols-1 gap-2 pt-2">
+                <div className="flex gap-2">
+                  <select id="audienceSelect" aria-label="Select audience age for explanation" className="bg-black/40 border border-white/10 rounded-lg px-2 text-[10px] text-white/70 focus:outline-none flex-1">
+                    <option value="a 5 year old child">Explain to 5yo</option>
+                    <option value="a high schooler">Explain to High Schooler</option>
+                    <option value="a college undergrad">Explain to Undergrad</option>
+                    <option value="an expert in the field">Explain to Expert</option>
+                  </select>
+                  <button 
+                    onClick={async () => {
+                      setActionLoading('explain');
+                      const selectElement = document.getElementById('audienceSelect') as HTMLSelectElement;
+                      const audience = selectElement.value;
+                      try {
+                        const res = await axios.post('http://127.0.0.1:8000/api/agent/qa', { id: String(id), question: `Explain the core concepts, contributions, and findings of this paper to ${audience}. Use appropriate analogies.` });
+                        setAgentResponseModal({ open: true, title: `Explanation for ${audience}`, content: res.data.answer });
+                      } catch (err) {
+                         setAgentResponseModal({ open: true, title: "Error", content: "Failed to generate explanation." });
+                      } finally {
+                        setActionLoading(null);
+                      }
+                    }}
+                    disabled={actionLoading !== null}
+                    className="py-2.5 px-4 bg-accent/20 border border-accent/40 rounded-xl text-[10px] font-bold hover:bg-accent/40 text-accent transition-all flex items-center justify-center gap-2"
+                  >
+                    <Lightbulb size={14} /> EXPLAIN
+                  </button>
+                </div>
+             </div>
+
+             {/* Referencing Engine */}
+             <div className="grid grid-cols-1 pt-4 border-t border-white/5 gap-2">
+                <p className="text-[10px] text-white/40 uppercase mb-1 font-bold tracking-tighter">Google Scholar Referencing Engine</p>
+                <div className="flex gap-2">
+                  <select id="citeStyleSelect" aria-label="Select citation style" className="bg-black/40 border border-white/10 rounded-lg px-2 text-[10px] text-white/70 focus:outline-none flex-1">
+                    <option value="ieee">IEEE</option>
+                    <option value="harvard">Harvard</option>
+                    <option value="apa">APA</option>
+                    <option value="mla">MLA</option>
+                    <option value="chicago">Chicago</option>
+                  </select>
+                  <button 
+                    onClick={() => {
+                       const selectElement = document.getElementById('citeStyleSelect') as HTMLSelectElement;
+                       setActionLoading('cite');
+                       handleCite(selectElement.value).finally(() => setActionLoading(null));
+                    }}
+                    disabled={actionLoading !== null}
+                    className={cn(
+                      "py-2.5 px-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-[10px] font-bold hover:bg-cyan-500/20 text-cyan-400 transition-all flex items-center justify-center gap-2",
+                      actionLoading === 'cite' && "opacity-50 cursor-wait"
+                    )}
+                  >
+                    <Quote size={14} className={cn(actionLoading === 'cite' && "animate-pulse")} />
+                    {actionLoading === 'cite' ? "GENERATING..." : "GENERATE_CITATION"}
+                  </button>
+                </div>
                 <button 
-                  onClick={() => {
-                     setActionLoading('cite');
-                     handleCite("apa").finally(() => setActionLoading(null));
+                  onClick={async () => {
+                     // Inline Citation logic
+                     const selectElement = document.getElementById('citeStyleSelect') as HTMLSelectElement;
+                     const style = selectElement.value;
+                     const text = style === 'ieee' ? '[1]' : `(${paper.metadata?.authors?.[0]?.split(' ').pop() || 'Author'} et al., ${paper.metadata?.year || new Date().getFullYear()})`;
+                     setAgentResponseModal({ open: true, title: "Inline Citation Created", content: `Inline format for ${style.toUpperCase()}:\n\n${text}\n\nYou can copy and paste this into your Authoring Studio text.` });
                   }}
-                  disabled={actionLoading !== null}
-                  className={cn(
-                    "py-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-[10px] font-bold hover:bg-cyan-500/20 text-cyan-400 transition-all flex items-center justify-center gap-2",
-                    actionLoading === 'cite' && "opacity-50 cursor-wait"
-                  )}
+                  className="w-full py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold hover:bg-white/10 text-white/60 transition-all flex items-center justify-center gap-2"
                 >
-                  <Quote size={14} className={cn(actionLoading === 'cite' && "animate-pulse")} />
-                  {actionLoading === 'cite' ? "GENERATING..." : "CITE_NODE"}
+                  <PenTool size={12} /> CREATE_INLINE_CITATION
                 </button>
+             </div>
+
+             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
                 <button 
                   onClick={handleResolve}
                   disabled={resolving}
                   className="py-2.5 bg-orange-500/10 border border-orange-500/20 rounded-xl text-[10px] font-bold hover:bg-orange-500/20 text-orange-400 transition-all flex items-center justify-center gap-2"
                 >
                   <Globe size={14} className={resolving ? "animate-spin" : ""} />
-                  {resolving ? "RESOLVING..." : "INSTITUTIONAL"}
+                  {resolving ? "FACT_CHECK..." : "FACT_CHECK"}
+                </button>
+                <button 
+                  onClick={() => alert("Presentation Mode initialized. Studio Hub resources bound to active paper.")}
+                  className="py-2.5 bg-pink-500/10 border border-pink-500/20 rounded-xl text-[10px] font-bold hover:bg-pink-500/20 text-pink-400 transition-all flex items-center justify-center gap-2"
+                >
+                  <Maximize2 size={14} />
+                  PRESENTATION
                 </button>
              </div>
 
@@ -265,7 +367,7 @@ export default function PaperPage() {
                   <input 
                     type="text" 
                     placeholder="Ask paper anything..."
-                    className="w-full bg-black/40 border border-white/10 rounded-lg pl-3 pr-10 py-2 text-xs focus:outline-none focus:border-accent/40"
+                    className="w-full bg-black/40 border border-white/10 rounded-lg pl-3 pr-10 py-2 text-xs focus:outline-none focus:border-accent/40 text-white"
                     onKeyDown={async (e) => {
                       if (e.key === 'Enter') {
                         const target = e.currentTarget;
@@ -277,10 +379,10 @@ export default function PaperPage() {
                         target.disabled = true;
                         
                         try {
-                          const res = await axios.post('http://127.0.0.1:8000/api/agent/qa', { id, question: q });
-                          alert(`Q: ${q}\n\n${res.data.answer || "No insights found."}`);
+                          const res = await axios.post('http://127.0.0.1:8000/api/agent/qa', { id: String(id), question: q });
+                          setAgentResponseModal({ open: true, title: `Q: ${q}`, content: res.data.answer || "No insights found." });
                         } catch (err) {
-                           alert("Network failure during QA query.");
+                           setAgentResponseModal({ open: true, title: "Error", content: "Network failure during QA query." });
                         } finally {
                           target.disabled = false;
                           target.value = '';
@@ -303,12 +405,12 @@ export default function PaperPage() {
               <button 
                 onClick={async () => {
                   try {
-                    const res = await axios.post('http://127.0.0.1:8000/api/agent/recommend', { id });
+                    const res = await axios.post('http://127.0.0.1:8000/api/agent/recommend', { id: String(id) });
                     console.log("Recommendations:", res.data.recommendations);
-                    alert("Highly relevant papers discovered. Check console for details.");
+                    setAgentResponseModal({ open: true, title: "Recommendations Discovered", content: "Highly relevant papers discovered. Check console for details." });
                   } catch (err) { console.error(err); }
                 }}
-                className="w-full p-4 bg-white/2 border border-white/5 rounded-2xl text-[11px] text-white/40 hover:border-accent/30 transition-all italic text-left"
+                className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-[11px] text-white/60 hover:border-accent/30 transition-all italic text-left"
               >
                 Scan cognitive map for related lineages...
               </button>
@@ -317,7 +419,7 @@ export default function PaperPage() {
 
           <section>
             <h2 className="text-[10px] font-black tracking-widest text-accent uppercase mb-3">Abstract</h2>
-            <p className="text-sm leading-relaxed text-white/70 font-sans">{paper.abstract || paper.content}</p>
+            <p className="text-sm leading-relaxed text-white/70 font-sans selection:bg-accent/40 selection:text-white">{paper.abstract || paper.content}</p>
           </section>
 
           <section>
@@ -347,8 +449,8 @@ export default function PaperPage() {
         </div>
 
         {/* Dynamic View Panel (PDF or Markdown) */}
-        <div className="flex-1 bg-[#111] relative group overflow-y-auto no-scrollbar">
-          {id.toString().startsWith("arxiv_") || /^\d{4}\.\d{4,5}$/.test(id.toString()) ? (
+        <div className="flex-1 bg-white dark:bg-[#111] relative group overflow-y-auto no-scrollbar">
+          {id?.toString().startsWith("arxiv_") || /^\d{4}\.\d{4,5}$/.test(id?.toString() || "") ? (
              <>
                <iframe 
                  src={`https://arxiv.org/pdf/${arxivId}.pdf`}
@@ -358,6 +460,7 @@ export default function PaperPage() {
                <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                  <button 
                    onClick={() => window.open(`https://arxiv.org/pdf/${arxivId}.pdf`, "_blank")}
+                   aria-label="Open PDF in new tab"
                    className="p-3 bg-black/80 backdrop-blur border border-white/20 rounded-full text-white hover:text-accent shadow-2xl"
                  >
                    <ExternalLink size={20} />
@@ -380,6 +483,25 @@ export default function PaperPage() {
         citation={citationModal.text}
         style={citationModal.style}
       />
+      {agentResponseModal.open && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="bg-[#080808] border border-accent/20 rounded-2xl w-full max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(var(--accent),0.1)] flex flex-col">
+            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
+              <h3 className="text-[10px] font-black tracking-widest text-accent uppercase flex items-center gap-2"><Bot size={14}/> {agentResponseModal.title}</h3>
+              <button 
+                onClick={() => setAgentResponseModal({ ...agentResponseModal, open: false })} 
+                aria-label="Close modal"
+                className="text-white/40 hover:text-white transition-colors"
+              >
+                <X size={16}/>
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[60vh] no-scrollbar">
+              <p className="text-sm leading-relaxed text-white/80 whitespace-pre-wrap font-mono">{agentResponseModal.content}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

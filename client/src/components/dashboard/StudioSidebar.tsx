@@ -91,12 +91,12 @@ export const StudioSidebar = ({ collapsed, setCollapsed }: StudioSidebarProps) =
     <motion.div 
       initial={false}
       animate={{ width: collapsed ? 80 : 280 }}
-      className="h-full bg-[#050505] border-l border-white/5 flex flex-col relative z-40 transition-all duration-300"
+      className="h-full bg-background dark:bg-[#050505] border-l border-black/5 dark:border-white/5 flex flex-col relative z-40 transition-all duration-300"
     >
       <div className="p-6">
         <div className={cn("flex items-center gap-2 mb-8 transition-opacity", collapsed && "opacity-0")}>
           <Sparkles className="w-4 h-4 text-accent" />
-          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-white/40">Studio Hub</h2>
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-black/60 dark:text-white/40">Studio Hub</h2>
         </div>
 
         <div className="grid grid-cols-1 gap-2">
@@ -106,7 +106,7 @@ export const StudioSidebar = ({ collapsed, setCollapsed }: StudioSidebarProps) =
               onClick={() => handleGenerate(item.id, item.label)}
               disabled={generatingId !== null}
               className={cn(
-                "w-full flex flex-col gap-3 p-5 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-accent/40 hover:bg-white/[0.06] transition-all group relative overflow-hidden disabled:opacity-50",
+                "w-full flex flex-col gap-3 p-5 rounded-2xl bg-black/[0.03] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 hover:border-accent/40 hover:bg-black/[0.06] dark:hover:bg-white/[0.06] transition-all group relative overflow-hidden disabled:opacity-50",
                 collapsed && "items-center p-4",
                 generatingId === item.id && "border-accent/60 bg-accent/5 ring-1 ring-accent/20"
               )}
@@ -115,22 +115,22 @@ export const StudioSidebar = ({ collapsed, setCollapsed }: StudioSidebarProps) =
                 {generatingId === item.id ? (
                   <Sparkles className="w-5 h-5 text-accent animate-spin" />
                 ) : (
-                  <item.icon className="w-5 h-5 text-white/60 group-hover:text-accent transition-colors" />
+                  <item.icon className="w-5 h-5 text-black/70 dark:text-white/60 group-hover:text-accent transition-colors" />
                 )}
-                {!collapsed && <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors">{item.label}</span>}
+                {!collapsed && <span className="text-sm font-bold text-black/80 dark:text-white/80 group-hover:text-black dark:text-white transition-colors">{item.label}</span>}
               </div>
               
               {!collapsed && (
                 <div className="flex items-center justify-between mt-1">
                   <span className={cn(
                     "text-[10px] uppercase font-black tracking-widest leading-none",
-                    generatingId === item.id ? "text-accent animate-pulse" : "text-white/20"
+                    generatingId === item.id ? "text-accent animate-pulse" : "text-black/40 dark:text-white/20"
                   )}>
                     {generatingId === item.id ? "Synthesizing..." : "Generate"}
                   </span>
                   <div className={cn(
                     "w-1 h-1 rounded-full transition-colors",
-                    generatingId === item.id ? "bg-accent" : "bg-white/10 group-hover:bg-accent"
+                    generatingId === item.id ? "bg-accent" : "bg-black/10 dark:bg-white/10 group-hover:bg-accent"
                   )} />
                 </div>
               )}
@@ -145,14 +145,14 @@ export const StudioSidebar = ({ collapsed, setCollapsed }: StudioSidebarProps) =
       <div className="mt-auto p-6">
         <div className={cn("bg-accent/5 border border-accent/10 rounded-2xl p-6 text-center transition-opacity", collapsed && "opacity-0 invisible")}>
            <Sparkles className="w-6 h-6 text-accent mx-auto mb-3" />
-           <p className="text-xs font-bold text-white/60 leading-tight">Studio output will be saved here.</p>
-           <p className="text-[10px] text-white/20 mt-2">After adding sources, click to generate specialized research artifacts.</p>
+           <p className="text-xs font-bold text-black/70 dark:text-white/60 leading-tight">Studio output will be saved here.</p>
+           <p className="text-[10px] text-black/40 dark:text-white/20 mt-2">After adding sources, click to generate specialized research artifacts.</p>
         </div>
       </div>
 
       <button 
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#111] border border-white/10 flex items-center justify-center hover:bg-accent hover:text-black transition-all shadow-xl z-50 text-white/60"
+        className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white dark:bg-[#111] border border-black/10 dark:border-white/10 flex items-center justify-center hover:bg-accent hover:text-black transition-all shadow-xl z-50 text-black/70 dark:text-white/60"
       >
         {collapsed ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
       </button>

@@ -36,7 +36,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
     { icon: Library, label: "Archive", href: "/dashboard/papers" },
     { icon: Bot, label: "Orchestrator", href: "/dashboard/agents" },
     { icon: Map, label: "Literature Recon", href: "/dashboard/litmaps" },
-    { icon: PenTool, label: "Ghostwriter", href: "/dashboard/ghostwriter" },
+    { icon: PenTool, label: "Authoring Studio", href: "/dashboard/authoring" },
     { icon: BookOpen, label: "Documentation", href: "/dashboard/docs" },
     { icon: Settings, label: "Settings", href: "/dashboard/settings" },
   ];
@@ -45,18 +45,18 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
     <motion.div 
       initial={false}
       animate={{ width: collapsed ? 64 : 260 }}
-      className="h-full border-r border-white/10 bg-[#050505] flex flex-col relative group z-50 shadow-[4px_0_24px_rgba(0,0,0,0.5)]"
+      className="h-full border-r border-black/10 dark:border-black/10 dark:border-white/10 bg-background dark:bg-[#050505] text-foreground flex flex-col relative group z-50 shadow-[4px_0_24px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.5)] transition-colors duration-300"
     >
       {/* Header / Brand */}
       <Link href="/dashboard" className={cn(
         "p-6 flex items-center gap-3 overflow-hidden cursor-pointer",
         collapsed && "justify-center px-0"
       )}>
-        <div className="w-8 h-8 rounded-sm bg-accent flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(var(--accent-rgb),0.5)]">
+        <div className="w-8 h-8 rounded-sm bg-white dark:bg-[#0a0a0a]ccent flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(var(--accent-rgb),0.5)]">
           <Box className="w-5 h-5 text-black" />
         </div>
         {!collapsed && (
-          <span className="font-bold tracking-tighter text-lg whitespace-nowrap bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
+          <span className="font-bold tracking-tighter text-lg whitespace-nowrap bg-clip-text text-transparent bg-gradient-to-r from-black to-black/60 dark:from-white dark:to-white/60">
             RESEARCH<span className="text-accent underline decoration-accent/30 underline-offset-4">AI</span>
           </span>
         )}
@@ -66,11 +66,11 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
       {!collapsed && (
         <div className="px-4 mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40 dark:text-black/40 dark:text-white/20" />
             <input 
               type="text" 
               placeholder="Query memory..."
-              className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-accent/50 transition-all placeholder:text-white/20"
+              className="w-full bg-black/5 dark:bg-black/5 dark:bg-white/5 border border-black/10 dark:border-black/10 dark:border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-foreground focus:outline-none focus:border-accent/50 transition-all placeholder:text-black/40 dark:placeholder:text-black/40 dark:text-white/20"
             />
           </div>
         </div>
@@ -87,15 +87,15 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group/item relative overflow-hidden",
                 isActive 
-                  ? "bg-accent/10 text-white border border-accent/20" 
-                  : "text-white/40 hover:bg-white/5 hover:text-white/80 border border-transparent",
+                  ? "bg-white dark:bg-[#0a0a0a]ccent/10 text-foreground border border-accent/20" 
+                  : "text-black/60 dark:text-black/60 dark:text-white/40 hover:bg-black/5 dark:hover:bg-black/5 dark:bg-white/5 hover:text-black dark:hover:text-black/80 dark:text-white/80 border border-transparent",
                 collapsed && "justify-center px-0"
               )}
             >
               {isActive && (
                 <motion.div 
                   layoutId="active-pill"
-                  className="absolute left-0 w-1 h-6 bg-accent rounded-r-full"
+                  className="absolute left-0 w-1 h-6 bg-white dark:bg-[#0a0a0a]ccent rounded-r-full"
                 />
               )}
               <item.icon className={cn(
@@ -109,18 +109,18 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
       </nav>
 
       {/* Footer / User */}
-      <div className="p-4 border-t border-white/5 bg-white/2">
+      <div className="p-4 border-t border-black/5 dark:border-black/5 dark:border-white/5 bg-black/5 dark:bg-black/5 dark:bg-white/5 transition-colors duration-300">
         <div className={cn(
           "flex items-center gap-3",
           collapsed && "justify-center"
         )}>
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/40 to-accent/10 border border-accent/30 flex items-center justify-center">
-            <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-white dark:bg-[#0a0a0a]ccent rounded-full animate-pulse" />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-[10px] font-black tracking-widest text-white/40 uppercase">Root_Access</span>
-              <span className="text-xs font-bold truncate text-white/80 tracking-tight">Frank_Van_Laarhoven</span>
+              <span className="text-[10px] font-black tracking-widest text-black/40 dark:text-black/60 dark:text-white/40 uppercase">Root_Access</span>
+              <span className="text-xs font-bold truncate text-black/80 dark:text-black/80 dark:text-white/80 tracking-tight">Frank_Van_Laarhoven</span>
             </div>
           )}
         </div>
@@ -129,7 +129,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
       {/* Collapse Toggle */}
       <button 
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-[#111] border border-white/10 flex items-center justify-center hover:bg-accent hover:text-black transition-all shadow-xl z-50 text-white/60"
+        className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-white dark:bg-[#111] border border-black/10 dark:border-black/10 dark:border-white/10 flex items-center justify-center hover:bg-white dark:bg-[#0a0a0a]ccent hover:text-black transition-all shadow-xl z-50 text-black/60 dark:text-black/70 dark:text-white/60"
       >
         {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
       </button>
